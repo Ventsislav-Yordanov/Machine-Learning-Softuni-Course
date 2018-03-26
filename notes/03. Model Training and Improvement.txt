@@ -1,0 +1,290 @@
+Използвайте cost function която има 1 минимум/максимум за да избегнем проблем с gradient descent (ако имаме много минимуми/максимуми да не попаднем в локални такива)
+
+Bias - variance tradeoff
+	* какво можем да направим за да получим от един модел възможно най-доброто
+	* централна тема в ML
+	* bias
+		* how far we are from the actual values to predicted value
+		* колко сме далеч от "центъра" (виж графиката от презентацията)
+	* variance
+		* variability of prediction for a certain data point
+		* до колко точно оцелваме целта
+		* голяма вариация в данните
+	* Мярка за тва колко е сложен модела
+		* Some models are not complex enough (don't describe the data well enough)
+			* Underfitting (high bias)
+			* моделът ни е твърде слаб
+			* това е bias който НИЕ вкарваме
+				* грешни предположения
+				* твърде много предположения
+				* и данните не отговарят на тези предположения
+			* Всяко едно предположение за модела, ограничава приложимостта му и вкарва bias
+			* при слабите модели имаме: големи грешки, малък score
+		* Some may describe the data "too well" and fail to generalize when new data points are introduced
+			* Overfitting (high variance)
+			* много сложен модел => предизвиква много големи вариации в даните
+				* с много малко промяна във входа, резултатът е много по-различен
+	* fit - апроксимация (приближение) на данните
+	* към модела имаме hyper parameters
+		* не са свързани с обучението
+		* променят модела
+		* трябва да изберем такива параметри които позволяват да имаме най-добрия модел
+		* примери
+			* какъв тип да бъде регресията (линейна, квадранта или от 6та степен)
+	* Regularizaion
+		* метод който ни помага да намерим добър компромис между bias и variance
+		* махаме шума
+		* handle higly correlated features
+		* indicator variables
+		* искаме променливите да са независими когато моделираме данните
+		* бележки
+			* искаме да ограничим параметрите т.е. да получим по-малки коефиценти и по-събрани на едно място
+			* казваме 
+				* "не прави твърде сложен модел"
+				* "не използвай твъде голяма степен"
+				* "не давай големи разлики в коефицентите на линейната регресия".
+			* Намаляваме изкуствено параметрите, за да намалим вариацията
+		* има 2 типа регуляризация
+			* L2 "second norm" (Euclidian)
+				* shrinks all model heights by the same value
+				* искаме да свием параметрите които модела ни научава за да бъдат по-близки до 0
+					* ако прекалим ще получим слаб модел
+					* ако изобщо не ги свием, ще получим твърде "описателен" модел (с големи разлики в output-a)
+					* трябва да свием оптимално параметрите
+				* вид: сума от квадрати
+				* стреми се от големи коефиценти да направи малки (т.е. всички коефиценти да ги събере към 0)
+					* колкото повече увелим regularization parameter-a, толкова повече коефицентите ще са събрани към 0 (ще бъдат скалирани)
+			* L1 "first norm"
+				* вид: сума от модули (сума от разстояния)
+				* стреми се някои коефиценти да станат 0
+					* някои коефиценти остават колкото са
+					* други стават 0 (т.е. маха ги и някои от колонките стават излишни)
+						пример: от 20 колонки използваме 15 (feature selection)
+		* норма - мярка за дължина, ако гледаме на данните като точки
+		* разликата между L1 и L2 регуляризацията е "вида" ѝ
+		* с regularization parameter-a вкарваме bias (предположение) за да намалим вариацията	
+			* ако не сме направили регуляризация, може да overfit-нем
+			* ако има твърде голям bias ще underfit-нем
+		* Linear Regression with Regularizaion
+			* Ridge regression (L2 regularization)
+			* LASSO (Least Abosulute Shrinkage Selection Operator) (L1 regularizaion)
+				* оператор който свива коефицентите и ги свежда до 0 (т.е. избира някои от тях) по абослютната им стойност
+				* маха най-малките абсолютни стойности
+			* Elastic Net (комбинация от горните 2)
+				* в идеалния случай ползваме тази регуляризация
+				* свежда до 0 някои коефиценти (L1)
+				* останалите ги намалява (L2)
+		* Logistic Regression with Regularizaion
+			* model = LogisticRegression 
+				* penaly = "l2" - стандартен начин за определяне на разстояниe
+				* параметъра "C" - обратно на регуляризация (1/ламбда)
+					* ако този параметър е много голям, регуляризация почти няма
+					* ако този параметър е много малък, регуляризацията е много голяма
+	* model testing
+		* NEVER test the model with the data you trained it on!
+		* много алгоритми за ML научават данните наизуст
+		* отделяме данните на "testing data" и "training data"
+			* обикновенно се делят на 70% training data и 30% testing data
+			* 90% към 10% не е много надежно защото остават много малко данни за тестване
+		* трябва да вземем randomized samples
+		* ако ползваме класификация, ние се нуждаем от "stratified samples"
+			* стратификация: раномерно разделяне
+				* в testing и trainig данните да имаме еднакви проценти на класовете
+					* пример:
+						* имаме 2 класа: клас 1 (65% от данните) и клас 2 (35% от данните)
+						* testing данните трябва да съдържат 65% данни с клас 1 и 35% данни с клас 2
+						* training данните също трябва да съдържат 65% данни с клас 1 и 35% данни с клас 2
+		* evaluating model performance
+			* scoring metrics
+				* Regression
+					* usually coefficient of determination: R^2
+						* частта от цялата вариация в точките която модела може да опише
+						* стандартно е число между 0 и 1
+						* добре e да бъде >= 0.97
+						* by default ако имаме модел с регресия, by default метриката e R^2
+					* други метрики
+						* mean squared error
+						* mean absolute error
+						* explained variance
+				* Classification
+					* usually: accuracy
+						* колко са класифицирани правилно спрямо всичките
+						* пример: за небалансирани данни accuracy не работи
+					* може да знаем нещо кеото да ни помогне да изберем "метрика за оценяване"
+					* ако не знаем коя метрика да изберем е добре да пробваме всички
+					* други метрики
+						* precision
+						* recall
+						* F1
+		* evaluating regression
+			* no fixed rules
+			* use your intuition and knowledge about the data
+			* residual - разстояние от точка до права
+			* guidelines
+				* добре е да пробваме няколко метрики
+				* create residual plots
+					* ако plot-нем остатъците и получим структура от тях модел-а е слаб - high bias
+						* защото ако сме хванали полезната информация, остава само шум 
+					* ако грешките са разпределени равномерно навсякъде (т.е. не само само около 0) са много големи - hig variance
+				* create a histogram of the residuals
+					* повечето residuals трябва да бъдат около 0
+		* evaluating classification
+			* confusion matrix (error matrix)
+				* ако не знаем коя метрика да използваме, можем да направим confusion matrix
+				* има го като метод в sklearn
+			* metrics
+				* Acurracy
+					* number of correctly classified samples
+					* при небалансирани данни, accuracy не е добра мярка
+						* пример: имаме клас 0 и клас 1, модела ни е "return 0" оценката за модела е 0.95, но модела даже не работи с данните
+				* Precision
+					how many selected samples are relevant
+					* колко от "позитивните" сме познали
+				* Recall
+					* how many relevant samples are selected
+					* колко от "правилните" сме познали
+				* F1 score
+					* средно хармонично умножено по 2 на Precision и Recall
+				* many other metrics exists (useful for specific cases)
+			* ROC (Receiver Operating Characteristic)
+				* limited to 2-class classification
+				* we can use "1 vs. all" for more classes (единия клас спрямо всички останали класове и да направим такива криви за всеки един клас по отделно)
+				* a plot of true positive rate vs. false positive rate
+					* a "bisector line" represents truly random guessing
+					* any curve above the line is better than random
+						* closer to the upper left corner = better
+						* below the line: better than random, but with exchanged classes
+							* we need to reverse the classifier output
+				* AUC (Area Under the Curve)
+					* площта под кривата
+					* closer to 1 = better
+	* cross-validation
+		* пример: разделяме данните на повече от 2 части (например 10)
+		* тренираме n различни алгоритъма
+		* всеки един от тях, запазва едната част от данните за алгоритъма и тренира с останалите
+		* проверяваме дали мярката за всеки един алгоритъм е подобна на другите
+		* ако имам големи разлики между отделните мерки значи алгоритъма ни overfit-ва
+			* това може да се оправи с увеличаване на регуляризацията
+				* следователно да изберем какво трябва да бъде числото ламбда (коефициент)
+		* ако имаме близки малки стойности на метрика - high bias 
+			* пример: acurracy 40% навсякъде
+			* алгоритъма работи консистентно, но слабо
+			* решение: ако имаме голяма регуляризация, я намаляме
+		* ако имаме различни високи стойности на метрика - high variance
+			* пример: (90%, 70%, 80%...)
+			* решение: увеличаваме регуляризацията
+		* начин за намиране на оптимална стойност на регуляризацията (brute-force search):
+			1. правим cross-validation
+			2. тестваме много на брой алгоритми
+			3. виждаме дали стойността на регуляризацията е добре
+			4. изпълняваме първите 3 стъпки със друга стойност на регуляризацията
+			* отнема много време
+			* примерни стойности на регуляризация: 0.01, 0.1, 1, 10, 100
+				* ако разберем че 10 е оптимално може да пробваме с: 5, 8, 10, 50
+		* използва се за:
+			* оптимизиране на 1 модел
+			* сравняване на модели
+	* Improved Technique
+		* split the data in "testing data" and "training data"
+		* perform cross-validation on the "training data"
+		* fine-tune the model / or select one of many models based on the best cross-validation score
+		* run the best model on the "testing data"
+			* we select the best models based on the training data => we have some bias
+				* One model will always have the highest score, even if it's by chance
+			* this truly out-of-sample method removes some of the bias
+		* model selection: choose the best performing model
+	* Learning Curves (криви на обучения)
+		* функция на грешката спрямо броя примери които модела е видял
+		* ако модела е видял малко примери, допуска големи грешки
+		* ако модела е видял много примери, допуска малки грешки
+		* intrinsic error – неточността в данните или характерно за самите данни
+			* колкото и точно да мерим данните, тва остава
+			* ако падаме под тази линия, значи апроксимираме шума
+			* 2 криви които са близки, но са далеч от очакваната стойност - high bias
+			* 2 криви които д/г оцелват правилно точността, но са сравнително далеч една от друга - high variance
+	* Hyperparameter tuning
+		* на всеки един параметът който искаме да използваме, му даваме няколко възможни стойности
+		* правим таблица от тях - grid search
+		* за всяка една комбинация от стойности правим cross-validation
+		* внимание: моделите може да станат много като бройка и да отнеме дни да се тренират
+			* решение: проверяваме случайни 20 комбинации от параметри и стойности
+				* ако разликите са големи, случайните комбинации няма да ни свършат работа
+				* решението е субоптимално, но е по-бързо
+		* идеята е от един и същи модел да изкараме максимума
+	* Making the best of our models
+		* select several algorithms (e.g. for classification)
+			* fine-tune their parameters using grid search (or some other technique)
+			* select the best combination of parameters
+		* compare the best algorithms for each type
+			* using the model section procedure
+				* hold-out set + cross-validation set
+			* select the best performing model type on the cross-validation set
+				* test it on holdout set
+		* improvements:
+			* perform test/train split on the hyperparameter tuning step
+			* use different performance scores
+	* Manipulating features
+		* making things simpler
+		* main ideas
+			* reduce the number of features (make the model more simple)
+			* keep relevant info only
+		* feature selection
+			* remove irrelevant features
+				* може да тренираме модели с всички колонки без първа, после без втора и т.н. и да видим кои са важните за модела
+			* regularizaion does a good job on this
+			* dimnsionality reduction
+		* feature engineering
+			* "manually" coming up with new, meaningful features
+				* requires a lot of work and domaing knowledge
+			* a sample process
+				* brainstorm features
+				* create some new features on your ideas
+				* chek how the features work with the model
+				* improve the new features if needed
+				* repeat all the prevous steps as many times as needed
+				* вкараме bias с нови колонки от нас, но намаляваме вариацията в данните
+		
+Cross-validation
+
+Сравняване на модели
+	* начина по който са се обучили
+	* тестваме ги с НОВИ данни
+
+Model tuning	
+	ако имаме 1 фиксиран модел какво можем да изкараме от него максимално
+Selection
+	ако имаме много различни модели, как да изберем най-добрия
+
+Feature Selection, Feature Engeneering
+	* ако имаме много на брой колони, как да направим от тях малко на брой колони
+	* Feature Selection пример: от 20 колонки направи 5 които са най-важни
+	* Feature Engeneering: ръчна работа по измисляне на feature-и
+		* комбинираме неща които вече сме виждали
+		* махаме/добавяме други
+		* идеята е дадем на алгоритъма възможно най-добрите и най-лесни за работа данни
+	
+Основи за ML модел
+	* да знаем как се тренира правилно
+	* да знаем как се тества правилно
+	* кои метрики кога се използват
+	
+	
+Идеята е да вкараме предположения които не са твърде силни и да ни позволяват да имаме добър модел
+Основния начин по който се вкарват предположения е като "добавка" на cost function на модела
+	* метода по който тва са прави се нарича регуляризация
+	
+Повече данни не винаги означат по-добър модел
+Повече колонки също не винаги означат по-добър модел
+Повече данни могат да ни помогнат
+	* ако модела overfit-ва много (т.е. сложен модел), повече данни може да му помогнат да се обучи по-добре
+	* ако модела дава добри резултати на трениране, слаби резултати на тестване (overfitting)
+
+Термини, ресурси и допълнителни бележки
+	* sklearn.datasets	
+	* Алгоритми които търгуват на стокова борса
+	* Data Samping
+	* Reproduciable Research
+	* Evidence based Research
+	* Regression, Classification - Supervised Learning
+	* heteroskedasticity
+	* https://en.wikipedia.org/wiki/Sensitivity_and_specificity
